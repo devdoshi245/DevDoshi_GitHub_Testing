@@ -1,7 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 
-const ApiExample = () => {
+const First = () => {
 
     let [data,setData]=useState({
         name:'',
@@ -24,10 +24,6 @@ const ApiExample = () => {
     }
     let saveData=(e)=>{
         e.preventDefault()
-        // setAlldata([
-        //     ...alldata,
-        //     data
-        // ])
         if(id!=''){
             axios.put("http://localhost:3000/users/"+id,data)
 
@@ -38,19 +34,11 @@ const ApiExample = () => {
     }
     let delData=(id)=>{
         axios.delete("http://localhost:3000/users/"+id)
-        // let res = alldata.filter((i,index)=>{
-        //     return index != id
-        // })
-        // setAlldata(res)
     }
     let editData =(id)=>{
         axios.patch("http://localhost:3000/users/"+id)
             .then((res)=>setData(res.data))
         setId(id)
-        // let res = alldata.find((i,index)=>{
-        //     return index == id
-        // })
-        // setData(res)
     }
   return (
     <div>
@@ -94,4 +82,4 @@ const ApiExample = () => {
   )
 }
 
-export default ApiExample
+export default First
