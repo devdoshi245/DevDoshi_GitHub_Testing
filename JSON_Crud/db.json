@@ -1,1 +1,41 @@
+{
+  "users": [
+    {
+      "name": "Test",
+      "age": "25",
+      "id": 2
+    },
+    {
+      "name": "Abc",
+      "age": "22",
+      "id": 4
+    }
+  ],
+  "emp": [],
+  "category": [
+    {
+      "id": 1,
+      "catname": "Men"
+    }
+  ],
+  "products":[
+    {
+      "pid":101,
+      "title":"Classis Spring",
+      "price":122
+    }
+  ],
+  "addtocart":[
+    {
+      "cartid":1,
+      "pid":101,
+      "qty":1
+    },
+    {
+      "cartid":2,
+      "pid":102,
+      "qty":1
+    }
 
+  ]
+}
