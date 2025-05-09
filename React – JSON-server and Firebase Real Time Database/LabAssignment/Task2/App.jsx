@@ -1,65 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth } from './firebase';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  doc
-} from 'firebase/firestore';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut
-} from 'firebase/auth';
+import { auth, googleProvider, signInWithPopup, signOut } from './firebase';
+import { getDocs, collection } from 'firebase/firestore';
 
 function App() {
+  const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
-  const [input, setInput] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const userCollection = collection(db, 'users');
 
-  const fetchUsers = async () => {
-    const data = await getDocs(userCollection);
-    setUsers(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
-  };
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(setUser);
+    return () => unsubscribe();
+  }, []);
 
-  const addUser = async () => {
-    if (input) {
-      await addDoc(userCollection, { name: input });
-      setInput('');
-      fetchUsers();
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      setUser(result.user);
+      alert('Logged in with Google');
+    } catch (error) {
+      alert(error.message);
     }
   };
 
-  const updateUser = async (id) => {
-    const userDoc = doc(db, 'users', id);
-    await updateDoc(userDoc, { name: prompt('Enter new name') });
-    fetchUsers();
+  const handleLogout = async () => {
+    await signOut(auth);
+    setUser(null);
+    alert('Logged out');
   };
 
-  const deleteUser = async (id) => {
-    const userDoc = doc(db, 'users', id);
-    await deleteDoc(userDoc);
-    fetchUsers();
-  };
-
-  const register = () => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then(() => alert('Registered'))
-      .catch(err => alert(err.message));
-  };
-
-  const login = () => {
-    signInWithEmailAndPassword(auth, email, password)
-      .then(() => alert('Logged in'))
-      .catch(err => alert(err.message));
-  };
-
-  const logout = () => {
-    signOut(auth).then(() => alert('Logged out'));
+  const fetchUsers = async () => {
+    const data = await getDocs(userCollection);
+    setUsers(data.docs.map(doc => doc.data()));
   };
 
   useEffect(() => {
@@ -68,34 +39,23 @@ function App() {
 
   return (
     <div>
-      <h2>Firebase Auth + CRUD</h2>
+      <h2>Firebase Google Authentication</h2>
 
-      <div>
-        <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
-        <input placeholder="Password" type="password" onChange={e => setPassword(e.target.value)} />
-        <button onClick={register}>Register</button>
-        <button onClick={login}>Login</button>
-        <button onClick={logout}>Logout</button>
-      </div>
-
-      <hr />
-
-      <input
-        placeholder="Enter name"
-        value={input}
-        onChange={e => setInput(e.target.value)}
-      />
-      <button onClick={addUser}>Add User</button>
-
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>
-            {user.name}
-            <button onClick={() => updateUser(user.id)}>Edit</button>
-            <button onClick={() => deleteUser(user.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+      {user ? (
+        <>
+          <p>Welcome, {user.displayName}</p>
+          <button onClick={handleLogout}>Logout</button>
+          <hr />
+          <h3>Users</h3>
+          <ul>
+            {users.map((user, index) => (
+              <li key={index}>{user.name}</li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <button onClick={handleGoogleLogin}>Login with Google</button>
+      )}
     </div>
   );
 }
